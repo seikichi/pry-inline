@@ -1,0 +1,21 @@
+AllCops:
+  Exclude:
+    - examples/*.rb
+
+Metrics/LineLength:
+  Max: 120
+
+Style/ClassVars:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/FileName:
+  Enabled: false
+
+Style/ParallelAssignment:
+  Enabled: false
+
+Lint/UselessAssignment:
+  Enabled: false
