@@ -17,7 +17,6 @@ class TestInline < Test::Unit::TestCase
     end
     EOF
     actual = output_of_whereami { greet }
-
     assert { actual.zip(expected).all? { |a, e| a.end_with?(e) } }
   end
 
@@ -102,8 +101,7 @@ class TestInline < Test::Unit::TestCase
               input: StringIO.new('exit'),
               output: output,
               color: false,
-              pager: false,
-              quiet: true)
+              pager: false)
     output.string.split("\n").slice(3..-1)
   end
 end
