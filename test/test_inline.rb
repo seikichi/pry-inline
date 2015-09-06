@@ -92,6 +92,21 @@ class TestInline < Test::Unit::TestCase
     assert { actual.zip(expected).all? { |a, e| a.end_with?(e) } }
   end
 
+  test 'assignment of var args' do
+    def use_var_args(*args)
+      @binding = binding
+    end
+
+    expected = <<-EOF.split("\n").map(&:lstrip)
+    def use_var_args(*args) # args: [1, 2, 3]
+      @binding = binding
+    end
+    EOF
+    actual = output_of_whereami { use_var_args(1, 2, 3) }
+
+    assert { actual.zip(expected).all? { |a, e| a.end_with?(e) } }
+  end
+
   private
 
   def output_of_whereami(&block)
