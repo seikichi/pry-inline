@@ -9,7 +9,7 @@ module PryInline
       @@binding = value
     end
 
-    def print_to_output(output, color)
+    def print_to_output(output, color = false)
       begin
         @lineno_to_variables = Hash.new { |h, k| h[k] = Set.new }
         traverse_sexp(Ripper.sexp(@lines.map(&:line).join("\n")))

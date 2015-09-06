@@ -1,6 +1,7 @@
 AllCops:
   Exclude:
     - examples/*.rb
+    - test/**/*.rb
 
 Metrics/LineLength:
   Max: 120
@@ -12,10 +13,4 @@ Style/Documentation:
   Enabled: false
 
 Style/FileName:
-  Enabled: false
-
-Style/ParallelAssignment:
-  Enabled: false
-
-Lint/UselessAssignment:
   Enabled: false
