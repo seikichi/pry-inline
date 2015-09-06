@@ -107,6 +107,24 @@ class TestInline < Test::Unit::TestCase
     assert { actual.zip(expected).all? { |a, e| a.end_with?(e) } }
   end
 
+  test 'assignment after binding.pry' do
+    def assignment_after_binding
+      x = 10
+      @binding = binding
+      y = 10
+    end
+
+    expected = <<-EOF.split("\n").map(&:lstrip)
+    def assignment_after_binding
+      x = 10 # x: 10
+      @binding = binding
+      y = 10
+    end
+    EOF
+    actual = output_of_whereami { assignment_after_binding }
+    assert { actual.zip(expected).all? { |a, e| a.end_with?(e) } }
+  end
+
   private
 
   def output_of_whereami(&block)
