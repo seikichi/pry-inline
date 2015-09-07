@@ -1,6 +1,6 @@
 module PryInline
   # monkey patch for Pry::Code
-  module InlineDebuggableCode
+  module CodeExtension
     MAX_DEBUG_INFO_LENGTH = 80
 
     @@binding = nil
