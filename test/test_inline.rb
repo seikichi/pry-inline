@@ -125,6 +125,35 @@ class TestInline < Test::Unit::TestCase
     assert { actual.zip(expected).all? { |a, e| a.end_with?(e) } }
   end
 
+  test 'keyword arguments' do
+    def keyword_arguments(a: 10, b: 20)
+      @binding = binding
+    end
+
+    expected = <<-EOF.split("\n").map(&:lstrip)
+    def keyword_arguments(a: 10, b: 20) # a: 10, b: 100
+      @binding = binding
+    end
+    EOF
+    actual = output_of_whereami { keyword_arguments(b: 100) }
+
+    assert { actual.zip(expected).all? { |a, e| a.end_with?(e) } }
+  end
+
+  test 'combinations of arguments' do
+    def f(a, m = 1, *rest, x, k: 1, **kwrest)
+      @binding = binding
+    end
+    expected = <<-EOF.split("\n").map(&:lstrip)
+    def f(a, m = 1, *rest, x, k: 1, **kwrest) # a: "a", m: 2, rest: ["f", "b"], x: "x", k: 42, kwrest: {:u=>"u"}
+      @binding = binding
+    end
+    EOF
+    actual = output_of_whereami { f('a', 2, 'f', 'b', 'x', k: 42, u: 'u') }
+
+    assert { actual.zip(expected).all? { |a, e| a.end_with?(e) } }
+  end
+
   private
 
   def output_of_whereami(&block)

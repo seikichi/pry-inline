@@ -43,6 +43,8 @@ module PryInline
       return sexp.each { |s| traverse_sexp_in_assignment(s) } if event.is_a?(Array)
       if %i( @ident @cvar @ivar ).include?(event)
         return @lineno_to_variables[sexp[2][0]] << sexp[1]
+      elsif %i( @label ).include?(event)
+        return @lineno_to_variables[sexp[2][0]] << sexp[1].slice(0..-2)
       end
 
       traverse_sexp_in_assignment(sexp[1..-1])
