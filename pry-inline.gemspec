@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Seiichi KONDO']
   spec.email         = ['seikichi@kmc.gr.jp']
 
-  spec.summary       = 'Inline debugging like RubyMine'
-  spec.description   = 'This Pry plugin enables inline debugging like RubyMine!'
+  spec.summary       = 'Inline variables view like RubyMine'
+  spec.description   = 'This Pry plugin enables inline variables view like RubyMine!'
   spec.homepage      = 'https://github.com/seikichi/pry-inline'
   spec.license       = 'MIT'
 

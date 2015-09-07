@@ -1,7 +1,7 @@
 # Pry Inline
 
 Pry Inline is a plugin for [pry](https://github.com/pry/pry/),
-which enables the inline debugging functionality like [RubyMine](https://www.jetbrains.com/ruby/help/inline-debugging.html).
+which enables the inline variables view like [RubyMine](https://www.jetbrains.com/ruby/help/inline-debugging.html).
 
 ![screenshot](./screenshot.png)
 
@@ -25,7 +25,7 @@ Or install it yourself as:
 
 There is no need to edit any configuration.
 After you have added the dependency in Gemfile,
-pry-inline will enable the inline debugging functionality.
+pry-inline will enable the inline variables view functionality.
 
 ## Development
 
