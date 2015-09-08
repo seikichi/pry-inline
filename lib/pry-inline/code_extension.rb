@@ -1,7 +1,9 @@
+require 'unicode'
+
 module PryInline
   # monkey patch for Pry::Code
   module CodeExtension
-    MAX_DEBUG_INFO_LENGTH = 80
+    MIN_DEBUG_INFO_LENGTH = 8
 
     @@binding = nil
 
@@ -11,12 +13,26 @@ module PryInline
 
     def print_to_output(output, color = false)
       begin
+        not_colorized_output_lines = super('', false).split("\n")
         @lineno_to_variables = Hash.new { |h, k| h[k] = Set.new }
         traverse_sexp(Ripper.sexp(@lines.map(&:line).join("\n")))
         @lineno_to_variables.each do |lineno, variables|
           next if lineno == 0 || @lines.length <= lineno
           next if @with_marker && lineno > (@marker_lineno - @lines[0].lineno)
-          add_debug_info(@lines[lineno - 1], variables)
+
+          original_width = Unicode.width(not_colorized_output_lines[lineno - 1])
+          debug_info_width = terminal_width - original_width % terminal_width
+          debug_info_width += terminal_width if debug_info_width < MIN_DEBUG_INFO_LENGTH
+
+          @lines[lineno - 1].tuple[0] +=
+            debug_info(variables)
+            .slice(0, debug_info_width)
+            .split('')
+            .map { |c| [c, Unicode.width(c)] }
+            .reduce([]) { |a, e| a + [[e[0], e[1] + (a.empty? ? 0 : a[-1][1])]] }
+            .take_while { |_, w| w < debug_info_width }
+            .map(&:first)
+            .join
         end
       ensure
         ret = super(output, color)
@@ -25,6 +41,10 @@ module PryInline
     end
 
     private
+
+    def terminal_width
+      `tput cols`.to_i
+    end
 
     def traverse_sexp(sexp)
       return unless sexp.is_a?(Array)
@@ -50,13 +70,6 @@ module PryInline
       traverse_sexp_in_assignment(sexp[1..-1])
     end
 
-    def add_debug_info(loc, variables)
-      return if !variables || (variables & defined_variables).size <= 0
-      info = debug_info(variables)
-      loc.tuple[0] += " # #{info[0..MAX_DEBUG_INFO_LENGTH]}"
-      loc.tuple[0] += ' ...' if info.length > MAX_DEBUG_INFO_LENGTH
-    end
-
     def defined_variables
       return [] unless @@binding
       @@binding.eval('local_variables').map(&:to_s) |
@@ -65,8 +78,9 @@ module PryInline
     end
 
     def debug_info(variables)
-      variables.select { |k| defined_variables.include?(k) }
-        .map { |k| "#{k}: #{@@binding.eval(k).inspect}" }
+      return '' if !variables || (variables & defined_variables).size <= 0
+      ' # ' + variables.select { |k| defined_variables.include?(k) }
+        .map { |k| "#{k}: #{@@binding.eval(k).inspect.gsub("\n", '')}" }
         .join(', ')
     end
   end
