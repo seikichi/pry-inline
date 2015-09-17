@@ -13,7 +13,7 @@ Pry.config.hooks.delete_hooks(:before_session)
 
 begin
   Pry.config.hooks.add_hook(:before_session, :pry_inline) do |_, target, _|
-    PryInline::CodeExtension.binding = target
+    PryInline::CodeExtension.current_binding = target
   end
 ensure
   before_session_hooks.each do |name, callable|

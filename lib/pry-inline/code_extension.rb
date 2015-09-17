@@ -5,10 +5,12 @@ module PryInline
   module CodeExtension
     MIN_DEBUG_INFO_LENGTH = 8
 
-    @@binding = nil
+    def self.current_binding
+      @current_binding
+    end
 
-    def self.binding=(value)
-      @@binding = value
+    def self.current_binding=(value)
+      @current_binding = value
     end
 
     def print_to_output(output, color = false)
@@ -71,16 +73,16 @@ module PryInline
     end
 
     def defined_variables
-      return [] unless @@binding
-      @@binding.eval('local_variables').map(&:to_s) |
-        @@binding.eval('self.instance_variables').map(&:to_s) |
-        @@binding.eval('self.class.class_variables').map(&:to_s)
+      return [] unless CodeExtension::current_binding
+      CodeExtension::current_binding.eval('local_variables').map(&:to_s) |
+        CodeExtension::current_binding.eval('self.instance_variables').map(&:to_s) |
+        CodeExtension::current_binding.eval('self.class.class_variables').map(&:to_s)
     end
 
     def debug_info(variables)
       return '' if !variables || (variables & defined_variables).size <= 0
       ' # ' + variables.select { |k| defined_variables.include?(k) }
-        .map { |k| "#{k}: #{@@binding.eval(k).inspect.gsub("\n", '')}" }
+        .map { |k| "#{k}: #{CodeExtension::current_binding.eval(k).inspect.delete("\n")}" }
         .join(', ')
     end
   end
