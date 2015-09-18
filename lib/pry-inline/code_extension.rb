@@ -17,7 +17,7 @@ module PryInline
       begin
         not_colorized_output_lines = super('', false).split("\n")
         @lineno_to_variables = Hash.new { |h, k| h[k] = Set.new }
-        traverse_sexp(Ripper.sexp(@lines.map(&:line).join("\n")))
+        traverse_sexp(Parser.sexp(@lines.map(&:line).join("\n")))
         @lineno_to_variables.each do |lineno, variables|
           next if lineno == 0 || @lines.length <= lineno
           next if @with_marker && lineno > (@marker_lineno - @lines[0].lineno)
@@ -73,16 +73,16 @@ module PryInline
     end
 
     def defined_variables
-      return [] unless CodeExtension::current_binding
-      CodeExtension::current_binding.eval('local_variables').map(&:to_s) |
-        CodeExtension::current_binding.eval('self.instance_variables').map(&:to_s) |
-        CodeExtension::current_binding.eval('self.class.class_variables').map(&:to_s)
+      return [] unless CodeExtension.current_binding
+      CodeExtension.current_binding.eval('local_variables').map(&:to_s) |
+        CodeExtension.current_binding.eval('self.instance_variables').map(&:to_s) |
+        CodeExtension.current_binding.eval('self.class.class_variables').map(&:to_s)
     end
 
     def debug_info(variables)
       return '' if !variables || (variables & defined_variables).size <= 0
       ' # ' + variables.select { |k| defined_variables.include?(k) }
-        .map { |k| "#{k}: #{CodeExtension::current_binding.eval(k).inspect.delete("\n")}" }
+        .map { |k| "#{k}: #{CodeExtension.current_binding.eval(k).inspect.delete("\n")}" }
         .join(', ')
     end
   end

@@ -3,6 +3,7 @@ require 'ripper'
 require 'set'
 
 require 'pry-inline/code_extension'
+require 'pry-inline/parser'
 
 Pry.config.hooks.add_hook(:when_started, :pry_inline) do
   Pry::Code.send(:prepend, PryInline::CodeExtension)
