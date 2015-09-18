@@ -53,7 +53,7 @@ module PryInline
       event = sexp[0]
 
       return sexp.each { |s| traverse_sexp(s) } if event.is_a?(Array)
-      return traverse_sexp_in_assignment(sexp[1]) if %i( assign massign ).include?(event)
+      return traverse_sexp_in_assignment(sexp[1]) if %i( assign opassign massign ).include?(event)
       return traverse_sexp_in_assignment(sexp[1..-1]) if event == :params
       traverse_sexp(sexp[1..-1]) unless event.to_s.start_with?('@')
     end
