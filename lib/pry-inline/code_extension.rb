@@ -33,15 +33,15 @@ module PryInline
           next if lineno == 0 || @lines.length <= lineno
           next if lineno > (current_line - @lines[0].lineno)
 
-          original_width = Unicode.width(not_colorized_output_lines[lineno - 1])
-          debug_info_width = terminal_width - original_width % terminal_width
+          original_width = Unicode.width(not_colorized_output_lines[lineno - 1], true)
+          debug_info_width = terminal_width - original_width % terminal_width + 1
           debug_info_width += terminal_width if debug_info_width < MIN_DEBUG_INFO_LENGTH
 
           @lines[lineno - 1].tuple[0] +=
             debug_info(variables)
             .slice(0, debug_info_width)
             .split('')
-            .map { |c| [c, Unicode.width(c)] }
+            .map { |c| [c, Unicode.width(c, true)] }
             .reduce([]) { |a, e| a + [[e[0], e[1] + (a.empty? ? 0 : a[-1][1])]] }
             .take_while { |_, w| w < debug_info_width }
             .map(&:first)

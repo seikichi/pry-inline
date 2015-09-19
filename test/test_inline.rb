@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'test/unit'
 require 'pry-inline'
 
@@ -229,6 +231,94 @@ EOF
 EOF
   end
 
+  test 'line number' do
+    def greet_with_line_number
+      message = 'Hello, world!'
+      @binding = binding
+      message
+    end
+
+    actual = output_of_whereami(with_line_number: true) { greet_with_line_number }
+    lineno = method(:greet_with_line_number).source_location[1]
+    assert_equal <<EOF.chomp, actual
+    #{lineno + 0}: def greet_with_line_number
+    #{lineno + 1}:   message = 'Hello, world!' # message: "Hello, world!"
+ => #{lineno + 2}:   @binding = binding
+    #{lineno + 3}:   message
+    #{lineno + 4}: end
+EOF
+  end
+
+  test 'too long debug info' do
+    def too_long_debug_info
+      message = '0' * 100
+      @binding = binding
+    end
+
+    actual = output_of_whereami(terminal_width: 40) { too_long_debug_info }
+    #                                   <= 40
+    assert_equal <<EOF.chomp, actual
+def too_long_debug_info
+  message = '0' * 100 # message: "000000
+  @binding = binding
+end
+EOF
+  end
+
+  test 'too long debug info and line number' do
+    def too_long_debug_info_and_line_number
+      message = '0' * 100
+      @binding = binding
+    end
+
+    actual = output_of_whereami(terminal_width: 40, with_line_number: true) do
+      too_long_debug_info_and_line_number
+    end
+    lineno = method(:too_long_debug_info_and_line_number).source_location[1]
+    assert_equal <<EOF.chomp, actual
+    #{lineno + 0}: def too_long_debug_info_and_line_number
+    #{lineno + 1}:   message = '0' * 100 # message
+ => #{lineno + 2}:   @binding = binding
+    #{lineno + 3}: end
+EOF
+  end
+
+  test 'too long debug info including wide characters' do
+    def too_long_debug_info_including_wide_characters
+      a = 'あa' * 100
+      @binding = binding
+    end
+
+    actual = output_of_whereami(terminal_width: 40) do
+      too_long_debug_info_including_wide_characters
+    end
+    #                                   <= 40
+    assert_equal <<EOF.chomp, actual
+def too_long_debug_info_including_wide_characters
+  a = 'あa' * 100 # a: "あaあaあaあaあa
+  @binding = binding
+end
+EOF
+  end
+
+  test 'too long debug info including ambigous characters' do
+    def too_long_debug_info_including_wide_characters
+      a = 'あa☆' * 100
+      @binding = binding
+    end
+
+    actual = output_of_whereami(terminal_width: 41) do
+      too_long_debug_info_including_wide_characters
+    end
+    #                                    <= 41
+    assert_equal <<EOF.chomp, actual
+def too_long_debug_info_including_wide_characters
+  a = 'あa☆' * 100 # a: "あa☆あa☆あa☆
+  @binding = binding
+end
+EOF
+  end
+
   private
 
   def output_of_whereami(terminal_width: 999,
@@ -238,12 +328,19 @@ EOF
     block.call
     output = StringIO.new
 
-    Pry.start(@binding,
-              input: StringIO.new("whereami #{with_line_number ? '' : '-n'}\nexit"),
-              output: output,
-              color: false,
-              pager: false,
-              quiet: true)
+    args = {
+      input: StringIO.new("whereami #{with_line_number ? '' : '-n'}\nexit"),
+      output: output,
+      color: false,
+      pager: false,
+      quiet: true
+    }
+    if Pry.respond_to?(:start_without_pry_byebug)
+      Pry.start_without_pry_byebug(@binding, **args)
+    else
+      Pry.start(@binding, **args)
+    end
+
     output.string.split("\n").slice(3..-1).join("\n")
   end
 end
