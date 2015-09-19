@@ -18,9 +18,10 @@ module PryInline
         not_colorized_output_lines = super('', false).split("\n")
         @lineno_to_variables = Hash.new { |h, k| h[k] = Set.new }
         traverse_sexp(Parser.sexp(@lines.map(&:line).join("\n")))
+        current_line = CodeExtension.current_binding.eval('__LINE__')
         @lineno_to_variables.each do |lineno, variables|
           next if lineno == 0 || @lines.length <= lineno
-          next if @with_marker && lineno > (@marker_lineno - @lines[0].lineno)
+          next if lineno > (current_line - @lines[0].lineno)
 
           original_width = Unicode.width(not_colorized_output_lines[lineno - 1])
           debug_info_width = terminal_width - original_width % terminal_width
@@ -63,7 +64,7 @@ module PryInline
       event = sexp[0]
 
       return sexp.each { |s| traverse_sexp_in_assignment(s) } if event.is_a?(Array)
-      if %i( @ident @cvar @ivar ).include?(event)
+      if %i( @ident @cvar @ivar @gvar ).include?(event)
         return @lineno_to_variables[sexp[2][0]] << sexp[1]
       elsif %i( @label ).include?(event)
         return @lineno_to_variables[sexp[2][0]] << sexp[1].slice(0..-2)
@@ -74,9 +75,10 @@ module PryInline
 
     def defined_variables
       return [] unless CodeExtension.current_binding
-      CodeExtension.current_binding.eval('local_variables').map(&:to_s) |
-        CodeExtension.current_binding.eval('self.instance_variables').map(&:to_s) |
-        CodeExtension.current_binding.eval('self.class.class_variables').map(&:to_s)
+      %w(local_variables global_variables
+         self.instance_variables self.class.class_variables).map do |exp|
+        CodeExtension.current_binding.eval(exp)
+      end.flatten.to_set.map(&:to_s)
     end
 
     def debug_info(variables)
