@@ -3,8 +3,6 @@ require 'unicode'
 module PryInline
   # monkey patch for Pry::Code
   module CodeExtension
-    MIN_DEBUG_INFO_LENGTH = 8
-
     def self.current_binding
       @current_binding
     end
@@ -35,7 +33,7 @@ module PryInline
 
           original_width = Unicode.width(not_colorized_output_lines[lineno - 1], true)
           debug_info_width = terminal_width - original_width % terminal_width + 1
-          debug_info_width += terminal_width if debug_info_width < MIN_DEBUG_INFO_LENGTH
+          debug_info_width += terminal_width if debug_info_width < min_debug_info_width
 
           @lines[lineno - 1].tuple[0] +=
             debug_info(variables)
@@ -96,6 +94,13 @@ module PryInline
       ' # ' + variables.select { |k| defined_variables.include?(k) }
         .map { |k| "#{k}: #{CodeExtension.current_binding.eval(k).inspect.delete("\n")}" }
         .join(', ')
+    end
+
+    def min_debug_info_width
+      if Pry.config.inline.is_a?(Hash)
+        min_width = Pry.config.inline[:min_debug_info_width]
+      end
+      min_width || 16
     end
   end
 end

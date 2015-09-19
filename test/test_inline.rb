@@ -319,11 +319,31 @@ end
 EOF
   end
 
+  test 'min debug info width option' do
+    def min_debug_info
+      message = '0' * 100
+      @binding = binding
+    end
+
+    actual = output_of_whereami(terminal_width: 40, min_debug_info_width: 22) do
+      min_debug_info
+    end
+    #                                   <= 40
+    assert_equal <<EOF.chomp, actual
+def min_debug_info
+  message = '0' * 100 # message: "0000000000000000000000000000000000000000000000
+  @binding = binding
+end
+EOF
+  end
+
   private
 
   def output_of_whereami(terminal_width: 999,
+                         min_debug_info_width: 0,
                          with_line_number: false,
                          &block)
+    Pry.config.inline = { min_debug_info_width: min_debug_info_width }
     TerminalWidthExtension.terminal_width = terminal_width
     block.call
     output = StringIO.new
