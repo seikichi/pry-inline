@@ -18,6 +18,16 @@ module PryInline
         not_colorized_output_lines = super('', false).split("\n")
         @lineno_to_variables = Hash.new { |h, k| h[k] = Set.new }
         traverse_sexp(Parser.sexp(@lines.map(&:line).join("\n")))
+
+        @lineno_to_variables.each do |lineno, variables|
+          variables.each do |v|
+            next unless @lineno_to_variables.any? do |l, vs|
+              l > lineno && vs.include?(v)
+            end
+            variables.delete(v)
+          end
+        end
+
         current_line = CodeExtension.current_binding.eval('__LINE__')
         @lineno_to_variables.each do |lineno, variables|
           next if lineno == 0 || @lines.length <= lineno

@@ -36,6 +36,27 @@ end
 EOF
   end
 
+  test 'operator assign of local variables' do
+    def opassign
+      x, y, z = 1, 2, false
+      x += 10
+      y *= 10
+      z ||= true
+      @binding = binding
+    end
+
+    actual = output_of_whereami { opassign }
+    assert_equal <<EOF.chomp, actual
+def opassign
+  x, y, z = 1, 2, false
+  x += 10 # x: 11
+  y *= 10 # y: 20
+  z ||= true # z: true
+  @binding = binding
+end
+EOF
+  end
+
   test 'parameters of block' do
     def block_parameters
       (1..10).each do |i|
