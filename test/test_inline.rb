@@ -181,6 +181,54 @@ end
 EOF
   end
 
+  test 'too long function' do
+    # FIXME: use `Pry::Command::Whereami.method_size_cutoff and Pry::Command#window_size`
+    def too_long_function
+      i = 0
+      i += 1
+      i += 1
+      i += 1
+      @binding = binding
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+    end
+    actual = output_of_whereami { too_long_function }
+    assert_equal <<EOF.chomp, actual
+    def too_long_function
+      i = 0
+      i += 1
+      i += 1
+      i += 1
+      @binding = binding
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+      i += 1
+EOF
+  end
+
   private
 
   def output_of_whereami(terminal_width: 999,
