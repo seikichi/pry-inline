@@ -8,6 +8,7 @@ task default: [:test]
 
 Rake::TestTask.new do |t|
   t.libs << 'test'
+  t.ruby_opts = ['-r./test/helper']
   t.test_files = Dir['test/**/test_*.rb']
   t.verbose = true
 end
