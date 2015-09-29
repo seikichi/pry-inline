@@ -2,6 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/pry-inline.svg)](http://badge.fury.io/rb/pry-inline)
 [![Build Status](https://travis-ci.org/seikichi/pry-inline.svg?branch=master)](https://travis-ci.org/seikichi/pry-inline)
+[![Coverage Status](https://coveralls.io/repos/seikichi/pry-inline/badge.svg?branch=master&service=github)](https://coveralls.io/github/seikichi/pry-inline?branch=master)
 
 Pry Inline is a plugin for [pry](https://github.com/pry/pry/),
 which enables the inline variables view like [RubyMine](https://www.jetbrains.com/ruby/help/inline-debugging.html).
