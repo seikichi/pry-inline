@@ -1,5 +1,8 @@
 # coding: UTF-8
 
+require 'coveralls'
+Coveralls.wear!
+
 module TerminalWidthExtension
   def self.terminal_width
     @width
