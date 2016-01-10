@@ -17,19 +17,22 @@ module PryInline
         @lineno_to_variables = Hash.new { |h, k| h[k] = Set.new }
         traverse_sexp(Parser.sexp(@lines.map(&:line).join("\n")))
 
+        current_line = CodeExtension.current_binding.eval('__LINE__') - @lines[0].lineno + 1
         @lineno_to_variables.each do |lineno, variables|
+          if lineno >= current_line
+            variables.clear
+            next
+          end
           variables.each do |v|
             next unless @lineno_to_variables.any? do |l, vs|
-              l > lineno && vs.include?(v)
+              l < current_line && l > lineno && vs.include?(v)
             end
             variables.delete(v)
           end
         end
 
-        current_line = CodeExtension.current_binding.eval('__LINE__')
         @lineno_to_variables.each do |lineno, variables|
           next if lineno == 0 || @lines.length <= lineno
-          next if lineno > (current_line - @lines[0].lineno)
 
           original_width = Unicode.width(not_colorized_output_lines[lineno - 1], true)
           debug_info_width = terminal_width - original_width % terminal_width + 1

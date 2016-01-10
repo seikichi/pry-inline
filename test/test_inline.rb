@@ -191,6 +191,7 @@ EOF
       i += 1
       i += 1
       @binding = binding
+      return i if i > 0
       i += 1
       i += 1
       i += 1
@@ -221,9 +222,9 @@ EOF
       i = 0
       i += 1
       i += 1
-      i += 1
+      i += 1 # i: 3
       @binding = binding
-      i += 1
+      return i if i > 0
       i += 1
       i += 1
       i += 1
@@ -333,6 +334,31 @@ EOF
 def min_debug_info
   message = '0' * 100 # message: "0000000000000000000000000000000000000000000000
   @binding = binding
+end
+EOF
+  end
+
+  test 'first statement' do
+    # Note: Without `return x if x > 0` line,
+    #       we'll see `x += 9 # x: 36` as a result of output_of_whereami method.
+    #       Because output_of_whereami method makes output string
+    #       after `foo` method finished (x becomes 36 by `x *= 3`).
+    def foo(x)
+      x += 9
+      @binding = binding
+      return x if x > 0
+      x *= 3
+      x
+    end
+
+    actual = output_of_whereami { foo(3) }
+    assert_equal <<EOF.chomp, actual
+def foo(x)
+  x += 9 # x: 12
+  @binding = binding
+  return x if x > 0
+  x *= 3
+  x
 end
 EOF
   end
