@@ -1,7 +1,15 @@
 # coding: UTF-8
 
+require 'simplecov'
 require 'coveralls'
-Coveralls.wear!
+
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+  SimpleCov::Formatter::HTMLFormatter,
+  Coveralls::SimpleCov::Formatter,
+]
+SimpleCov.start do
+  add_filter 'test'
+end
 
 module TerminalWidthExtension
   def self.terminal_width
@@ -15,14 +23,4 @@ module TerminalWidthExtension
   def terminal_width
     TerminalWidthExtension.terminal_width
   end
-end
-
-begin
-  if ENV['COVERAGE']
-    require 'simplecov'
-    SimpleCov.start do
-      add_filter '/test/'
-    end
-  end
-rescue LoadError
 end
