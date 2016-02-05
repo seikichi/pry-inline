@@ -363,6 +363,23 @@ end
 EOF
   end
 
+  test 'rescue variable' do
+    def cause_error
+      raise 'Hello, world!'
+    rescue => e
+      @binding = binding
+    end
+
+    actual = output_of_whereami { cause_error }
+    assert_equal <<EOF.chomp, actual
+def cause_error
+  raise 'Hello, world!'
+rescue => e # e: #<RuntimeError: Hello, world!>
+  @binding = binding
+end
+EOF
+  end
+
   private
 
   def output_of_whereami(terminal_width: 999,
