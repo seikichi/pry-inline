@@ -10,7 +10,9 @@ Pry.config.hooks.add_hook(:when_started, :pry_inline) do
 end
 
 before_session_hooks = Pry.config.hooks.get_hooks(:before_session)
-Pry.config.hooks.delete_hooks(:before_session)
+before_session_hooks.each_key do |name|
+  Pry.config.hooks.delete_hook(:before_session, name)
+end
 
 begin
   Pry.config.hooks.add_hook(:before_session, :pry_inline) do |_, target, _|
