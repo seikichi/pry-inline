@@ -10,6 +10,8 @@ module PryInline
     end
 
     Ripper::PARSER_EVENTS.each do |event|
+      next if event == :parse_error # A custom handler is provided below
+
       module_eval(<<-End, __FILE__, __LINE__ + 1)
         def on_#{event}(*args)
           args.unshift :#{event}
