@@ -2,6 +2,8 @@
 
 ## master (unreleased)
 
+- Add support for pry 0.11.x
+
 ## 1.0.3 (2017-02-01)
 
 ### Bug fixes
