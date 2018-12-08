@@ -2,6 +2,10 @@
 
 ## master (unreleased)
 
+## 1.0.5 (2018-12-08)
+
+- Add support for pry 0.12.2.
+
 ## 1.0.4 (2017-10-17)
 
 ### Changes
