@@ -17,7 +17,12 @@ module PryInline
         @lineno_to_variables = Hash.new { |h, k| h[k] = Set.new }
         traverse_sexp(Parser.sexp(@lines.map(&:line).join("\n")))
 
-        current_line = CodeExtension.current_binding.eval('__LINE__') - @lines[0].lineno + 1
+        current_line =
+          if CodeExtension.current_binding.respond_to?(:source_location)
+            CodeExtension.current_binding.source_location[1]
+          else
+            CodeExtension.current_binding.eval('__LINE__')
+          end - @lines[0].lineno + 1
         @lineno_to_variables.each do |lineno, variables|
           if lineno >= current_line
             variables.clear
